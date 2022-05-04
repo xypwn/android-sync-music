@@ -1,0 +1,47 @@
+#!/usr/bin/env sh
+
+###BEGIN CONFIGURATION###
+SOURCE_DIR="$HOME/Music/"
+DEST_DIR="Internal shared storage/Music/"
+###END CONFIGURATION###
+
+UID=$(id -u -r)
+
+die() {
+	echo "\033[31;1m$@\033[m"
+	exit 1
+}
+
+info() {
+	echo "\033[33;1m$@\033[m"
+}
+
+get_mtp_dir() {
+	mtpdir="$(echo /run/user/$UID/gvfs/mtp* | head -n1)"
+	[ -d "$mtpdir" ] && echo "$mtpdir"
+}
+
+info "Configuration: 💻:'$SOURCE_DIR' -> 📱:'$DEST_DIR'."
+
+[ ! -d "$SOURCE_DIR" ] && die "The specified source directory '$SOURCE_DIR' does not exist!"
+
+if [ -n "$(get_mtp_dir)" ]; then
+	info "MTP already mounted."
+else
+	info "Mounting MTP device..."
+	mtpdev="$(gio mount -li | sed -ne 's@.*=\(mtp://.*\)@\1@p')"
+	[ -z "$mtpdev" ] && die "MTP device not found!"
+	gio mount "$mtpdev" || die "Unable to mount MTP device!"
+fi
+
+info "Syncing to '$(get_mtp_dir)'."
+rsync --progress \
+      --human-readable \
+      --omit-dir-times \
+      --no-perms \
+      --size-only \
+      --recursive \
+      --inplace \
+       "$SOURCE_DIR" "$(get_mtp_dir)/$DEST_DIR" \
+	&& info "Success!" \
+	|| die "Error synchronizing files!"
