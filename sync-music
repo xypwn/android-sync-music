@@ -42,6 +42,7 @@ rsync --progress \
       --size-only \
       --recursive \
       --inplace \
+      --exclude='*.parts' \
        "$SOURCE_DIR" "$(get_mtp_dir)/$DEST_DIR" \
 	&& info "Success!" \
 	|| die "Error synchronizing files!"
