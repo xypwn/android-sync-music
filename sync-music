@@ -21,6 +21,7 @@ get_mtp_dir() {
 	[ -d "$mtpdir" ] && echo "$mtpdir"
 }
 
+[ -z "$1" ] && info "Any arguments are passed to rsync."
 info "Configuration: 💻:'$SOURCE_DIR' -> 📱:'$DEST_DIR'."
 
 [ ! -d "$SOURCE_DIR" ] && die "The specified source directory '$SOURCE_DIR' does not exist!"
@@ -43,6 +44,7 @@ rsync --progress \
       --recursive \
       --inplace \
       --exclude='*.parts' \
+      "$@" \
        "$SOURCE_DIR" "$(get_mtp_dir)/$DEST_DIR" \
 	&& info "Success!" \
 	|| die "Error synchronizing files!"
