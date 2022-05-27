@@ -2,7 +2,7 @@
 
 ###BEGIN CONFIGURATION###
 SOURCE_DIR="$HOME/Music/"
-DEST_DIR="Internal shared storage/Music/"
+DEST_DIR="Internal shared storage/Music/Synced/"
 ###END CONFIGURATION###
 
 UID=$(id -u -r)
@@ -44,6 +44,8 @@ rsync --progress \
       --recursive \
       --inplace \
       --exclude='*.parts' \
+      --exclude='*.m3u' \
+      --delete \
       "$@" \
        "$SOURCE_DIR" "$(get_mtp_dir)/$DEST_DIR" \
 	&& info "Success!" \
